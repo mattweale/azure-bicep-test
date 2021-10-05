@@ -33,4 +33,4 @@ resource virtualNetwork 'Microsoft.Network/virtualNetworks@2021-02-01' = {
   dependsOn: []
 }
 
-output peSubnetId string = '${virtualNetwork.id}/subnets/${default}'
+//output peSubnetId string = '${virtualNetwork.id}/subnets/${default}'

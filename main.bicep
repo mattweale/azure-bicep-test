@@ -52,13 +52,13 @@ module storageModule './modules/storage-account.bicep' = {
 }
 
 //Call the Private Endpoint Module
-module privateEndpoint './modules/private-endpoints.bicep' = {
-  scope: resourceGroup(rgName)
-  name: 'plink-${blobName.name}'
-  params: {
-    location: location
-   }
-  dependsOn: [
-    storageModule
-  ]
-}
+//module privateEndpoint './modules/private-endpoints.bicep' = {
+//  scope: resourceGroup(rgName)
+//  name: 'plink-${blobName.name}'
+//  params: {
+//    location: location
+//   }
+//  dependsOn: [
+//   storageModule
+//  ]
+//}
