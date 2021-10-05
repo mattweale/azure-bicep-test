@@ -1,0 +1,70 @@
+//Decompile ARM Template to Bicep
+//az bicep decompile --file vnet.json
+
+//Specify Target Scope
+targetScope = 'subscription'
+
+//Create some parameters
+param location string = 'uksouth'
+param rgName string = 'rg-secure-function'
+param storageAccountName string = 'sa${uniqueString(subscription().id)}'
+param storageAccountSkuName string = 'Standard_LRS'
+param virtualNetworkName string = 'vnet-${uniqueString(subscription().id)}'
+param tags object = {
+  'environment' : 'dev-test'
+  'purpose'     : 'secure-functions-test'
+  'createdby'   : 'bicep'
+}
+
+resource newRG 'Microsoft.Resources/resourceGroups@2021-04-01' = {
+  name: rgName
+  location: location
+  tags: tags
+}
+
+//First call vNET Module
+module vNetModule './modules/vnet.bicep' = {
+  name: 'vNetDeploy'
+  scope: newRG
+  params: {
+    location: location
+    virtualNetworkName: virtualNetworkName
+  }
+}
+
+//Call the Storage Module
+module storageModule './modules/storage-account.bicep' = {
+  name: 'storageAccountDeploy'
+  scope: newRG
+  params: {
+    location: location
+    storageAccountName: storageAccountName
+    storageAccountSkuName: storageAccountSkuName
+    tags: tags
+  }
+}
+
+output x string = storageModule.outputs.outputBlobName
+output y string = storageModule.outputs.outputFileName
+
+//Create the Storage Private Endpoints
+module privEndpointModule './modules/private-endpoints.bicep' = {
+  name: 'blah'
+  scope: newRG
+  params: {
+    peNamePrefix: storageModule.outputs.outputBlobName
+    //privateEndpointName: 'pe-secure-function-blob'
+    //privateEndpointConnectionId: '/subscriptions/5545c350-5947-4001-8f12-d2e422addb7d/resourceGroups/rg-secure-function-app/providers/Microsoft.Network/privateEndpoints/privateLinkServiceConnections/pe-secure-function-blob_13fa89b6-2300-4d24-8d78-73c2554d704a'
+    //privateEndpointConnectionName: 'pe-secure-function-blob_13fa89b6-2300-4d24-8d78-73c2554d704a'
+    //privateEndpointId: '/subscriptions/5545c350-5947-4001-8f12-d2e422addb7d/resourceGroups/rg-secure-function-app/providers/Microsoft.Network/privateEndpoints/pe-secure-function-blob'
+    //privateEndpointApiVersion: '2020-03-01'
+    //privateLinkServiceId: '/subscriptions/5545c350-5947-4001-8f12-d2e422addb7d/resourcegroups/rg-secure-function-app/providers/Microsoft.Storage/storageAccounts/satesty'
+    //groupId: 'blob'
+    //subnetId: '/subscriptions/5545c350-5947-4001-8f12-d2e422addb7d/resourceGroups/rg-set-dev-demo/providers/Microsoft.Network/virtualNetworks/vnet-set-dev-demo/subnets/subnet-one'
+    //location: location
+    //tags: {}
+  }
+  dependsOn: [
+    storageModule
+  ]
+}
