@@ -9,25 +9,25 @@ param storageAccountName string = 'sa${uniqueString(subscription().id)}'
 param storageAccountSkuName string = 'Standard_LRS'
 param virtualNetworkName string = 'vnet-${uniqueString(subscription().id)}'
 param tags object = {
-  'environment' : 'dev-test'
-  'purpose'     : 'secure-functions-test'
-  'createdby'   : 'bicep'
+  'environment': 'dev-test'
+  'purpose': 'secure-functions-test'
+  'createdby': 'bicep'
 }
 
 //First create Resource Group
 module newRG './modules/resource-group.bicep' = {
   name: rgName
   params: {
-  location: location
-  tags: tags
+    location: location
+    tags: tags
   }
 }
 
 //Call vNET Module
 module vNetModule './modules/vnet.bicep' = {
-  scope: resourceGroup(rgName) 
+  scope: resourceGroup(rgName)
   name: 'vNetDeploy'
-   params: {
+  params: {
     location: location
     virtualNetworkName: virtualNetworkName
   }
@@ -52,13 +52,17 @@ module storageModule './modules/storage-account.bicep' = {
 }
 
 //Call the Private Endpoint Module
-//module privateEndpoint './modules/private-endpoints.bicep' = {
-//  scope: resourceGroup(rgName)
-//  name: 'plink-${blobName.name}'
-//  params: {
-//    location: location
-//   }
-//  dependsOn: [
-//   storageModule
-//  ]
-//}
+module privateEndpoint 'modules/storage-account-private-endpoint.bicep' = {
+  scope: resourceGroup(rgName)
+  name: 'storageAccountDeploy-pe'
+  params: {
+    location: location
+    storageAccountName: storageModule.outputs.outStorAcc
+    storageAccountId: storageModule.outputs.storageAccountId
+    virtualNetworkId: vNetModule.outputs.virtualNetworkId
+    privateEndPointSubnetId: vNetModule.outputs.peSubnetId
+  }
+  dependsOn: [
+    storageModule
+  ]
+}
