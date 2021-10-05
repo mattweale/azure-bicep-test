@@ -2,9 +2,9 @@ param location string = resourceGroup().location
 param storageAccountName string = 'sa${uniqueString(resourceGroup().id)}'
 param storageAccountSkuName string = 'Standard_LRS'
 param tags object = {
-  'environment' : 'dev-test'
-  'purpose'     : 'secure-functions-test'
-  'createdby'   : 'bicep'
+  'environment': 'dev-test'
+  'purpose': 'secure-functions-test'
+  'createdby': 'bicep'
 }
 
 //Create a Storage Account
@@ -19,9 +19,9 @@ resource storageAccount 'Microsoft.Storage/storageAccounts@2021-04-01' = {
   properties: {
     accessTier: 'Hot'
   }
- }
+}
 
- resource storageAccount_Blob 'Microsoft.Storage/storageAccounts/blobServices@2021-04-01' = {
+resource storageAccount_Blob 'Microsoft.Storage/storageAccounts/blobServices@2021-04-01' = {
   parent: storageAccount
   name: 'default'
   dependsOn: [
@@ -38,5 +38,6 @@ resource storageAccount_File 'Microsoft.Storage/storageAccounts/fileservices@202
 }
 
 output outStorAcc string = storageAccount.name
+output storageAccountId string = storageAccount.id
 output blobName string = storageAccount_Blob.name
 output fileName string = storageAccount_File.name

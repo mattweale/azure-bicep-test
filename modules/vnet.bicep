@@ -20,6 +20,7 @@ resource virtualNetwork 'Microsoft.Network/virtualNetworks@2021-02-01' = {
         name: 'default'
         properties: {
           addressPrefix: '10.0.0.0/24'
+          privateEndpointNetworkPolicies: 'Disabled'
         }
       }
       {
@@ -33,4 +34,5 @@ resource virtualNetwork 'Microsoft.Network/virtualNetworks@2021-02-01' = {
   dependsOn: []
 }
 
-//output peSubnetId string = '${virtualNetwork.id}/subnets/${default}'
+output virtualNetworkId string = virtualNetwork.id
+output peSubnetId string = virtualNetwork.properties.subnets[0].id
